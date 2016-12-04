@@ -1,4 +1,5 @@
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 public class Deque<Item> implements Iterable<Item> {
 
@@ -21,6 +22,7 @@ public class Deque<Item> implements Iterable<Item> {
 	}
 
 	public void addFirst(Item item) {
+		validateInput(item);
 		if (head == 0)
 			head = s.length - 1;
 		else
@@ -31,7 +33,13 @@ public class Deque<Item> implements Iterable<Item> {
 			resizeArray(2 * s.length);
 	}
 
+	private void validateInput(Item item) {
+		if (item == null)
+			throw new NullPointerException();
+	}
+
 	public void addLast(Item item) {
+		validateInput(item);
 		if (tail == s.length - 1) {
 			s[tail] = item;
 			tail = 0;
@@ -44,6 +52,7 @@ public class Deque<Item> implements Iterable<Item> {
 	}
 
 	public Item removeFirst() {
+		checkForEmpty();
 		Item temp;
 		if (head == s.length - 1) {
 			temp = s[head];
@@ -60,6 +69,7 @@ public class Deque<Item> implements Iterable<Item> {
 	}
 
 	public Item removeLast() {
+		checkForEmpty();
 		Item temp;
 		if (tail == 0) {
 			temp = s[s.length - 1];
@@ -75,19 +85,62 @@ public class Deque<Item> implements Iterable<Item> {
 		return temp;
 	}
 
+	private void checkForEmpty() {
+		if (n == 0)
+			throw new NoSuchElementException();
+	}
+
 	public Iterator<Item> iterator() {
-		return null;
-		// return an iterator over items in order from front to end
+		return new ArrayIterator();
+	}
+
+	private class ArrayIterator implements Iterator<Item> {
+		private int i = 0;
+
+		@Override
+		public boolean hasNext() {
+			return i < n;
+		}
+
+		@Override
+		public Item next() {
+			if (!hasNext())
+				throw new NoSuchElementException();
+			Item item = s[(i + head) % s.length];
+			i++;
+			return item;
+		}
+
+		public void remove() {
+			throw new UnsupportedOperationException();
+		}
+
 	}
 
 	private void resizeArray(int cap) {
 		Item[] copy = (Item[]) new Object[cap];
-		for (int i = 0; i < s.length; i++) {
-			
+		for (int i = 0; i < n; i++) {
+			copy[i] = s[(head + i) % s.length];
 		}
+		s = copy;
+		head = 0;
+		tail = n;
 	}
 
 	public static void main(String[] args) {
-		// unit testing
+		Deque<String> dq = new Deque<String>();
+		dq.addFirst("addfirst");
+		dq.addFirst("addfirst2");
+		dq.addFirst("addfirst3");
+		dq.addLast("addlast1");
+		dq.addFirst("addfirst4");
+		dq.addLast("addlast2");
+
+		// dq.removeFirst();
+		// dq.removeLast();
+		for (String string : dq) {
+			System.out.println(string);
+		}
+		// System.out.println(Arrays.toString(dq.s));
 	}
 }
